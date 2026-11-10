@@ -38,6 +38,7 @@ button{font:inherit;cursor:pointer;color:inherit}
 .feedhead h2{font:500 22px 'Inter Tight',sans-serif;letter-spacing:-.02em;margin:0;text-transform:none;color:var(--ink)}
 .tools{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .tool{border:0;border-radius:999px;background:#e6e2d9;color:var(--ink);padding:8px 14px;font:500 13px 'Inter Tight',sans-serif;text-transform:none;letter-spacing:0;box-shadow:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 0 14px}.chips .tool{padding:7px 12px}.chips .tool .cn{opacity:.6;margin-left:4px;font-weight:400}
 .tool:hover{background:#dbd6cb}
 .tool[aria-pressed=true]{background:var(--ink);color:#fff}
 .feed{display:flex;flex-direction:column;padding:6px 0 48px}
@@ -213,6 +214,7 @@ body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 
 <main class="wrap">
 <div class="feedhead" id="relatos"><h2>Como foi a sua experiência <span class="nwr">na <span class="logoblur" role="img" aria-label="nome da empresa oculto"></span>?</span></h2><div class="tools"><button type="button" class="tool" id="ord" aria-label="Ordem dos relatos: primeiros primeiro. Toque para inverter"><span id="ordl">Primeiros</span> <span class="arr" id="ordarr" aria-hidden="true">↓</span></button><button type="button" class="tool" id="unseen" aria-pressed="false">Só os que não vi <span id="ucount"></span></button></div></div>
+<div class="chips" id="chips" role="group" aria-label="Filtrar por tipo de reclamação"></div>
 <section class="feed" id="feed" aria-label="relatos" aria-busy="true"><div class="skel"></div><div class="skel s2"></div><div class="skel"></div></section>
 </main>
 
@@ -251,7 +253,9 @@ function hash(t){let h=2166136261;for(const c of t){h^=c.charCodeAt(0);h=Math.im
 const usedNames=new Set();
 function nameFor(id){let h=hash(id);for(let k=0;k<400;k++){const a=LET[h%LET.length],w=WORDS[(h>>>5)%2],z=LET[(h>>>9)%LET.length];const n=a+w+z;if(a!==z&&!usedNames.has(n)){usedNames.add(n);return n}h=Math.imul(h,1103515245)+12345>>>0}return 'x'+id}
 const AV=['a1','a2','a3','a4'];
-let posts=[],order='old',onlyUnseen=false;
+let posts=[],order='old',onlyUnseen=false,tagSel=null;
+const TAGS={burnout:'Burnout e saúde mental',horas:'Horas extras e plantão',salario:'Salário e benefícios',assedio:'Assédio e humilhação',gestao:'Gestão e liderança',creditos:'Créditos e ideias roubadas',contrato:'PJ e contrato',atendimento:'Atendimento',social:'Social media',seguranca:'Segurança e condições',processo:'Processo seletivo e curso'};
+function drawChips(){const box=$('#chips');if(!box)return;box.replaceChildren();const cnt={};posts.forEach(p=>(p.tags||[]).forEach(t=>{cnt[t]=(cnt[t]||0)+1}));if(!Object.keys(cnt).length)return;const mk=(k,label,n)=>{const b=el('button','tool',label);b.type='button';b.setAttribute('aria-pressed',String(tagSel===k));b.append(el('span','cn',String(n)));b.onclick=()=>{tagSel=(tagSel===k)?null:k;render()};box.append(b)};mk(null,'Todos',posts.length);Object.keys(TAGS).filter(k=>cnt[k]).sort((a,b)=>cnt[b]-cnt[a]).forEach(k=>mk(k,TAGS[k],cnt[k]))}
 const seenKey='fdb-seen-v1';let seen={};try{seen=JSON.parse(localStorage.getItem(seenKey)||'{}')}catch{}
 const markSeen=id=>{if(!seen[id]){seen[id]=1;try{localStorage.setItem(seenKey,JSON.stringify(seen))}catch{}updUnseen()}};
 const isSeen=id=>!!(seen[id]||votes[id]);
@@ -267,14 +271,15 @@ const seenIO='IntersectionObserver' in window?new IntersectionObserver(es=>es.fo
  clearTimeout(seenTimers.get(id));
  if(ok){seenTimers.set(id,setTimeout(()=>{markSeen(id);seenIO.unobserve(e.target)},1500))}}),{threshold:[0,.2,.4,.6,.8,1]}):null;
 function render(){
- updUnseen();
+ updUnseen();drawChips();
  feed.removeAttribute('aria-busy');
  usedNames.clear();posts.forEach(p=>{p._n=nameFor(p.id)});
  feed.replaceChildren();
  $('#count').textContent=posts.length;
  if(posts.length&&onlyUnseen&&!posts.some(p=>!isSeen(p.id))){const d=el('div','empty');d.append(el('strong',null,'Você viu todos.'),el('span',null,'Desligue "Só os que não vi" para rever os relatos.'));feed.append(d);return}
  if(!posts.length){const d=el('div','empty');d.append(el('strong',null,'Nenhum relato ainda.'),el('span',null,'As mensagens passam por revisão antes de aparecer aqui.'));feed.append(d);return}
- const list=posts.filter(p=>!onlyUnseen||!isSeen(p.id)); if(order==='new')list.reverse();
+ const list=posts.filter(p=>(!onlyUnseen||!isSeen(p.id))&&(!tagSel||(p.tags||[]).includes(tagSel))); if(order==='new')list.reverse();
+ if(!list.length){const d=el('div','empty');d.append(el('strong',null,'Nenhum relato nesse filtro.'),el('span',null,'Escolha outro tipo ou toque em Todos.'));feed.append(d);return}
  list.forEach(p=>{
   const num=String(posts.indexOf(p)+1).padStart(2,'0');
   const card=el('article','card');const av=document.createElement('img');av.className='av';av.src='avatars/'+AV[posts.indexOf(p)%4]+'.jpg';av.alt='';av.width=46;av.height=46;av.loading='lazy';card.append(av);
