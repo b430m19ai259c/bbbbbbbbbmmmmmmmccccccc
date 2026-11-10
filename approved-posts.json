@@ -117,8 +117,7 @@
   "data": "2026-11-08",
   "tags": [
    "assedio",
-   "horas",
-   "atendimento"
+   "horas"
   ]
  },
  {
@@ -265,8 +264,7 @@
   "origem": "site",
   "data": "2026-11-09",
   "tags": [
-   "assedio",
-   "social"
+   "assedio"
   ]
  },
  {
@@ -277,8 +275,7 @@
   "tags": [
    "salario",
    "horas",
-   "assedio",
-   "atendimento"
+   "assedio"
   ]
  },
  {
@@ -312,9 +309,7 @@
   "text": "relato de fã que tava na parte VIP do show do [[x]] e ouviu ela passando dizendo que “tava foda filmar na parte da frente pq não tinha muita galera arrumada pra fazer vídeo”. falei disso com o meu namorado no dia e fiquei muito chateada.",
   "origem": "site",
   "data": "2026-11-10",
-  "tags": [
-   "social"
-  ]
+  "tags": []
  },
  {
   "id": "r33",
@@ -341,8 +336,6 @@
   "origem": "site",
   "data": "2026-11-10",
   "tags": [
-   "social",
-   "atendimento",
    "salario",
    "assedio"
   ]
@@ -472,8 +465,7 @@
   "origem": "site",
   "data": "2026-11-10",
   "tags": [
-   "creditos",
-   "social"
+   "creditos"
   ]
  },
  {
