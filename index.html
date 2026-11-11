@@ -332,12 +332,14 @@ feedEl.addEventListener('click',e=>{const c=e.target.closest('.card');if(!c||e.t
  if(!was){c.classList.add('pop');const b=c.querySelector('.bubble.clip'),m=c.querySelector('.more');if(b&&m)m.click()}});
 document.addEventListener('click',e=>{if(!e.target.closest('.card'))feedEl.querySelectorAll('.card.pop').forEach(x=>x.classList.remove('pop'))});
 /* contador de visitas: conta 1x por aparelho por dia; ?semcontar só lê */
-(()=>{const vis=$('#vis');if(!vis)return;const day=new Date().toISOString().slice(0,10),K='fdb-visit-day';
- let novo=true;try{novo=localStorage.getItem(K)!==day}catch{}
+(()=>{const vis=$('#vis');if(!vis)return;const day=new Date().toISOString().slice(0,10),K='fdb-visit-day',LAST='fdb-vis-last',BASE=8970;
+ let novo=true,last=0;try{novo=localStorage.getItem(K)!==day;last=Number(localStorage.getItem(LAST))||0}catch{}
  if(/semcontar/.test(location.search))novo=false;
- fetch(CB+'/'+(novo?'hit':'get')+'/'+CNS+'/visitas').then(r=>r.status===404?{value:0}:r.ok?r.json():Promise.reject()).then(j=>{
-  if(novo){try{localStorage.setItem(K,day)}catch{}}
-  const n=Number(j.value);if(Number.isFinite(n))vis.textContent=n.toLocaleString('pt-BR')}).catch(()=>{})})();
+ let atual=Math.max(last,BASE);vis.textContent=atual.toLocaleString('pt-BR');
+ if(novo){try{localStorage.setItem(K,day)}catch{}}
+ const mostra=j=>{const n=Number(j&&j.value);if(Number.isFinite(n)&&n>=atual){atual=n;vis.textContent=n.toLocaleString('pt-BR');try{localStorage.setItem(LAST,String(n))}catch{}}};
+ const pede=(modo,tenta)=>fetch(CB+'/'+modo+'/'+CNS+'/visitas').then(r=>r.status===404?{value:0}:r.ok?r.json():Promise.reject()).then(mostra).catch(()=>{if(tenta>0)setTimeout(()=>pede('get',tenta-1),5000)});
+ pede(novo?'hit':'get',3)})();
 load();
 })();
 </script></body></html>
