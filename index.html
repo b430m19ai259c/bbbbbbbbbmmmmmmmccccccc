@@ -364,6 +364,6 @@ function start(){if(!ready)return;on=true;setVol();yt.playVideo();paint()}
 function stop(){on=false;if(ready)yt.pauseVideo();paint()}
 btn.addEventListener("click",function(e){e.stopPropagation();touched=true;on?stop():start()});
 document.addEventListener("pointerdown",function(){if(!touched){touched=true;start()}},{once:true});
-var t=document.createElement("script");t.src="https://www.youtube.com/iframe_api";document.head.appendChild(t);
+var MUSICA=false;if(MUSICA){var t=document.createElement("script");t.src="https://www.youtube.com/iframe_api";document.head.appendChild(t);}
 window.onYouTubeIframeAPIReady=function(){yt=new YT.Player("ytm",{height:"1",width:"1",videoId:"5a1PEWVl3qE",playerVars:{controls:0,loop:1,playlist:"5a1PEWVl3qE",playsinline:1,disablekb:1,fs:0},events:{onReady:function(){ready=true;yt.setVolume(VOL);if(touched)start()}}})};
 })();</script></body></html>
